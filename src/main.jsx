@@ -15,6 +15,8 @@ import './index.css';
 const config = {
   baseurl: "https://access.axiomprotect.com:6653/AxiomProtect",
   showPopup: true,
+  userId: 'avinash@mollatech.com',
+  linkForTC: 'https://access.axiomprotect.com:6653/AxiomActivateToken/TermsAndCondition.html',
   onResponse: function onResponse(data) {
     console.log("Response item :::", data);
   },
