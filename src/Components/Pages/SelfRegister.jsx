@@ -122,13 +122,13 @@ export default function SelfRegPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/user/create?requestTime=${reqTime}`,
+                url: `${config?.baseurl}/user/create?requestTime=${reqTime}`,
                 data: jsonObject,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/user/create', 'response':response?.data});
+            onResponse({ 'at':'/user/create', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setSRegShowSuccessMessage(true);
@@ -139,7 +139,7 @@ export default function SelfRegPage(props) {
             }
         } catch (error) {
             setSRegShowSuccessMessage(false);
-            onError({ 'at':'/v1/user/create', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/user/create', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setSRegErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setSRegLoading(false);

@@ -100,12 +100,12 @@ export default function LoginPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/v1/user/getUserByType?requestTime=${reqTime}&searchFor=${loginEmailId}&type=${appType}`,
+                url: `${config?.baseurl}/user/getUserByType?requestTime=${reqTime}&searchFor=${loginEmailId}&type=${appType}`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/user/getUserByType', 'response':response?.data});
+            onResponse({ 'at':'/user/getUserByType', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setLoginUserDetails(response?.data?.resultData);
@@ -117,7 +117,7 @@ export default function LoginPage(props) {
             }
         } catch (error) {
             setActiveStep(0);
-            onError({ 'at':'/v1/user/getUserByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/user/getUserByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setLoginLoading(false);
@@ -131,12 +131,12 @@ export default function LoginPage(props) {
                 const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
                 const response = await axios({
                     method: 'post',
-                    url: `${config?.baseurl}/v1/authenticator/checkPushTransactionStatus?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&pushId=${id}`,
+                    url: `${config?.baseurl}/authenticator/checkPushTransactionStatus?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&pushId=${id}`,
                     headers: {
                         "authToken": tokenValue
                     }
                 });
-                onResponse({ 'at':'/v1/authenticator/checkPushTransactionStatus', 'response':response?.data});
+                onResponse({ 'at':'/authenticator/checkPushTransactionStatus', 'response':response?.data});
                 setLoginPushStatusDetails(response?.data);
                 if(response?.data?.resultCode === 0) {
                     setActiveStep(3);
@@ -147,7 +147,7 @@ export default function LoginPage(props) {
                 }
             } catch (error) {
                 setActiveStep(1);
-                onError({ 'at':'/v1/authenticator/checkPushTransactionStatusP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+                onError({ 'at':'/authenticator/checkPushTransactionStatusP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
                 setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
             }
         }, 1000); // call API every second
@@ -165,12 +165,12 @@ export default function LoginPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/token/sendOTP?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&category=3&type=1`,
+                url: `${config?.baseurl}/token/sendOTP?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&category=3&type=1`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/token/sendOTP', 'response':response?.data});
+            onResponse({ 'at':'/token/sendOTP', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActiveStep(2);
@@ -181,7 +181,7 @@ export default function LoginPage(props) {
             }
         } catch (error) {
             setActiveStep(1);
-            onError({ 'at':'/v1/token/sendOTP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/token/sendOTP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setLoginLoading(false);
@@ -214,13 +214,13 @@ export default function LoginPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/authenticator/sendPush?requestTime=${reqTime}&accountId=${loginUserDetails?.accountid}&userId=${loginUserDetails?.userid}`,
+                url: `${config?.baseurl}/authenticator/sendPush?requestTime=${reqTime}&accountId=${loginUserDetails?.accountid}&userId=${loginUserDetails?.userid}`,
                 data: jsonObject,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/authenticator/sendPush', 'response':response?.data});
+            onResponse({ 'at':'/authenticator/sendPush', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setLoginPushId(response?.data?.resultData);
@@ -234,7 +234,7 @@ export default function LoginPage(props) {
             }
         } catch (error) {
             setActiveStep(1);
-            onError({ 'at':'/v1/authenticator/sendPush', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/authenticator/sendPush', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setLoginLoading(false);
@@ -264,12 +264,12 @@ export default function LoginPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/token/verifyOTP?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&OTP=${loginOTP}&category=${loginSelectedMethod==1?3:1}`,
+                url: `${config?.baseurl}/token/verifyOTP?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&OTP=${loginOTP}&category=${loginSelectedMethod==1?3:1}`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/token/verifyOTP', 'response':response?.data});
+            onResponse({ 'at':'/token/verifyOTP', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActiveStep(3);
@@ -280,7 +280,7 @@ export default function LoginPage(props) {
             }
         } catch (error) {
             setActiveStep(2);
-            onError({ 'at':'/v1/token/verifyOTP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/token/verifyOTP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setLoginLoading(false);
@@ -487,7 +487,7 @@ export default function LoginPage(props) {
                                     onClick={() => {
                                         setActiveStep(0);
                                     }}
-                                    disabled={loginLoading && loginPushLoading}
+                                    disabled={loginLoading || loginPushLoading}
                                     sx={{
                                         // borderRadius: '30px',
                                         fontWeight:'bold',
@@ -502,7 +502,7 @@ export default function LoginPage(props) {
                                 </Button>
                                 <LoadingButton 
                                     variant='contained'
-                                    loading={loginLoading && loginPushLoading}
+                                    loading={loginLoading || loginPushLoading}
                                     disabled={loginSelectedMethod ? false : true}
                                     type='submit'
                                     sx={{

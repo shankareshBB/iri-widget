@@ -4,7 +4,7 @@
 
 Use this script tag to get access to the widget.
 
-**_`<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.0/dist/index.min.js"></script>`_**
+**_`<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.1/dist/index.min.js"></script>`_**
 
 ## Implementation:
 
@@ -12,7 +12,7 @@ Use this script tag to get access to the widget.
 
 1. Create or open an html file.
 
-2. Add a button with the id **`useiri`**. It is used to call the iri by on click event.
+2. Add a button with the id **`useiri`**. It is used to call the axiom by on click event.
 
 ```html
 <button id="useiri">Open</button>
@@ -27,7 +27,7 @@ Use this script tag to get access to the widget.
 4. Add a Script tag to the head tag or body tag. And use the latest version.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.0/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.1/dist/index.min.js"></script>
 ```
 
 5. Next, add the script tag at a necessary place. But add below the widget script.
@@ -59,7 +59,7 @@ _Here, the config variable is used to pass the data. And the container variable 
 
 - _**`baseurl`** should pass as a string value. It is used as the base URL for API calls._
 - _**`showPopup`** is used to pass a boolean value ( **`true`** or **`false`** ). To toggle the widget popup._
-- _**`userId`** should pass as a string value. It is used get the jwt token from the operator mail._
+- _**`userId`** should pass as a string value. It is used to get the jwt token from the operator mail._
 - _**`linkForTC`** should pass as a string value. It is used to redirect the Terms and condition page or any URL or **`#`** ._
 - _**`onResponse`** is a callback function. It is getting called when the API gives a successful response. Return data is an object with its API endpoint and result._
 - _**`onError`** is a callback function. It is getting called when the API gives an error message. Return data is an object with its API endpoint and result._

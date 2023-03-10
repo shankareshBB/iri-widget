@@ -91,12 +91,12 @@ export default function ActivateTokenPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/v1/user/getAssignedApplications?requestTime=${reqTime}&accountId=${accountId}&userId=${userId}&type=${appType}`,
+                url: `${config?.baseurl}/user/getAssignedApplicationsByType?requestTime=${reqTime}&accountId=${accountId}&userId=${userId}&appType=${appType}`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/user/getAssignedApplications', 'response':response?.data});
+            onResponse({ 'at':'/user/getAssignedApplicationsByType', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActTokenAppDetails(response?.data?.resultData?.filter(function (e) {
@@ -110,7 +110,7 @@ export default function ActivateTokenPage(props) {
             }
         } catch (error) {
             setActiveStep(0);
-            onError({ 'at':'/v1/user/getAssignedApplications', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/user/getAssignedApplicationsByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         }
     };
@@ -130,12 +130,12 @@ export default function ActivateTokenPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/v1/user/getUserByType?requestTime=${reqTime}&searchFor=${actTokenEmailId}&type=${appType}`,
+                url: `${config?.baseurl}/user/getUserByType?requestTime=${reqTime}&searchFor=${actTokenEmailId}&type=${appType}`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/user/getUserByType', 'response':response?.data});
+            onResponse({ 'at':'/user/getUserByType', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActTokenUserDetails(response?.data?.resultData);
@@ -146,7 +146,7 @@ export default function ActivateTokenPage(props) {
             }
         } catch (error) {
             setActiveStep(0);
-            onError({ 'at':'/v1/user/getUserByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/user/getUserByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setActTokenLoading(false);
@@ -161,12 +161,12 @@ export default function ActivateTokenPage(props) {
         try {
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/absolute/generateToken?accountId=${actTokenUserDetails?.accountid}&id=${actTokenUserDetails?.userid}&appId=${actTokenAppId}&tokenType=2`,
+                url: `${config?.baseurl}/absolute/generateToken?accountId=${actTokenUserDetails?.accountid}&id=${actTokenUserDetails?.userid}&appId=${actTokenAppId}&tokenType=2`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/absolute/generateToken', 'response':response?.data});
+            onResponse({ 'at':'/absolute/generateToken', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActTokenOTPDetails(response?.data?.resultData);
@@ -178,7 +178,7 @@ export default function ActivateTokenPage(props) {
             }
         } catch (error) {
             setActiveStep(1);
-            onError({ 'at':'/v1/absolute/generateToken', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/absolute/generateToken', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setActTokenLoading(false);
@@ -193,12 +193,12 @@ export default function ActivateTokenPage(props) {
         try {
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/absolute/verifyOneTimePassword?userId=${actTokenUserDetails?.userid}&otp=${actTokenOTP}&appId=${actTokenAppId}`,
+                url: `${config?.baseurl}/absolute/verifyOneTimePassword?userId=${actTokenUserDetails?.userid}&otp=${actTokenOTP}&appId=${actTokenAppId}`,
                 headers: {
                     "authToken": tokenValue
                 }
             });
-            onResponse({ 'at':'/v1/absolute/verifyOneTimePassword', 'response':response?.data});
+            onResponse({ 'at':'/absolute/verifyOneTimePassword', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActiveStep(3);
@@ -209,7 +209,7 @@ export default function ActivateTokenPage(props) {
             }
         } catch (error) {
             setActiveStep(2);
-            onError({ 'at':'/v1/absolute/verifyOneTimePassword', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            onError({ 'at':'/absolute/verifyOneTimePassword', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         } finally {
             setActTokenLoading(false);

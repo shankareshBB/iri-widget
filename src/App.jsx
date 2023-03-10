@@ -41,9 +41,9 @@ function App({ config }) {
     try {
       const resp = await axios({
         method: 'POST',
-        url: `${config?.baseurl}/v1/absolute/getJWTToken?userId=${config?.userId}`
+        url: `${config?.baseurl}/absolute/getJWTToken?userId=${config?.userId}`
       });
-      onResponse({"at":"/v1/absolute/getJWTToken", "response":resp.data});
+      onResponse({"at":"/absolute/getJWTToken", "response":resp.data});
       if(resp?.data?.resultCode === 0) {
         setWidgetStatusDisplay('');
         setTokenValue(resp?.data?.resultData || '');
@@ -63,7 +63,7 @@ function App({ config }) {
 
       setCallingApi(false);
     } catch (error) {
-      onError({"at":"/v1/absolute/getJWTToken", "error": error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+      onError({"at":"/absolute/getJWTToken", "error": error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
       setWidgetStatusDisplay(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
       setCallingApi(false);
     }
