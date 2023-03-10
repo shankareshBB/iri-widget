@@ -8,16 +8,23 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Avatar, FormGroup, Stack } from '@mui/material';
+import { CardActionArea, Avatar, FormGroup, Stack } from '@mui/material';
 // images
 import IRIClose from '../../assets/close-button.png';
 import IRIPush from '../../assets/001-notification.png';
 import IRIMail from '../../assets/002-email.png';
+import IRISoft from '../../assets/003-soft.png';
+import IRIAxiomProtect from '../../assets/axiom_protect_logo.png';
+import IRIGoogleAuthToken from '../../assets/Google_Authenticator_for_Android_icon.svg.png';
+import IRIMicrosoftAuthToken from '../../assets/MicrosoftMFA.webp';
 // files
 import axios from 'axios';
 import SelfRegPage from './SelfRegister';
@@ -66,7 +73,6 @@ export default function FirstPageIndex(props) {
   const [sRegShowSuccessMessage, setSRegShowSuccessMessage] = React.useState(false);
 
   // Login form values and error/success message
-  const [loginAccountId, setLoginAccountId] = React.useState('');
   const [loginEmailId, setLoginEmailId] = React.useState('');
   const [loginErrorMessage, setLoginErrorMessage] = React.useState('');
   const [loginUserDetails, setLoginUserDetails] = React.useState({});
@@ -74,21 +80,49 @@ export default function FirstPageIndex(props) {
     {
       id: '1',
       name: 'Email OTP',
-      image: IRIMail
+      image: IRIMail,
+      category:3
     },
     {
       id: '2',
+      name: 'Soft OTP',
+      image: IRISoft,
+      category:1
+    },
+    {
+      id: '3',
       name: 'Push',
-      image: IRIPush
+      image: IRIPush,
+      category:0 //no category
     },
   ];
   const [loginSelectedMethod, setLoginSelectedMethod] = React.useState('');
-  const [loginAppId, setLoginAppId] = React.useState('');
-  const [loginOTPDetails, setLoginOTPDetails] = React.useState('');
+  const [loginPushId, setLoginPushId] = React.useState('');
+  const [loginPushStatusDetails, setLoginPushStatusDetails] = React.useState({});
   const [loginOTP, setLoginOTP] = React.useState('');
 
   // Activate token form values and error/success message
-  const [actTokenAccountId, setActTokenAccountId] = React.useState('');
+  const actTokenTokenChoices = [
+    {
+      type:1,
+      name:'Axiom Protect Absolute Token',
+      title:'Activate Axiom Token',
+      image:IRIAxiomProtect
+    },
+    {
+      type:7,
+      name:'Google Authentication Token',
+      title:'Activate Google Token',
+      image:IRIGoogleAuthToken
+    },
+    {
+      type:7,
+      name:'Microsoft Authentication Token',
+      title:'Activate Microsoft Token',
+      image:IRIMicrosoftAuthToken
+    }
+  ];
+  const [actTokenAppType, setActTokenAppType] = React.useState({});
   const [actTokenEmailId, setActTokenEmailId] = React.useState('');
   const [actTokenErrorMessage, setActTokenErrorMessage] = React.useState('');
   const [actTokenUserDetails, setActTokenUserDetails] = React.useState({});
@@ -111,16 +145,15 @@ export default function FirstPageIndex(props) {
     setSRegErrorMessage('');     // clear error message of self registration
     setSRegShowSuccessMessage(false); // clear success message of self registration
     
-    setLoginAccountId('');       // clear form value of login
     setLoginEmailId('');         // clear form value of login
     setLoginErrorMessage('');    // clear error message of login
     setLoginUserDetails({});     // clear api response of get user by type
     setLoginSelectedMethod('');  // clear selected method of login
-    setLoginOTPDetails('');      // clear api response of generate token
-    setLoginAppId('');           // clear selected application id
+    setLoginPushStatusDetails({});// clear api response of push status
+    setLoginPushId('');          // clear api response push id
     setLoginOTP('');             // clear form value of login
     
-    setActTokenAccountId('');    // clear form value of activate token
+    setActTokenAppType({});      // clear selected app type of token
     setActTokenEmailId('');      // clear form value of activate token
     setActTokenErrorMessage(''); // clear error message of activate token
     setActTokenUserDetails({});  // clear api response of get user by type
@@ -159,11 +192,11 @@ export default function FirstPageIndex(props) {
           <Avatar 
             src={IRIClose}
             alt="Close"
-            // style={{
+            style={{
             //   margin: "0px",
-            //   width: "25px",
-            //   height: "25px",
-            // }} 
+              width: "25px",
+              height: "25px",
+            }} 
           />
         </IconButton>
         {/* --------- CLOSE ICON --------- */}
@@ -219,8 +252,6 @@ export default function FirstPageIndex(props) {
                 setPage={setPage}
                 
                 appType={1}
-                loginAccountId={loginAccountId}
-                setLoginAccountId={setLoginAccountId}
                 loginEmailId={loginEmailId}
                 setLoginEmailId={setLoginEmailId}
                 loginErrorMessage={loginErrorMessage}
@@ -230,44 +261,75 @@ export default function FirstPageIndex(props) {
                 loginMethods={loginMethods}
                 loginSelectedMethod={loginSelectedMethod}
                 setLoginSelectedMethod={setLoginSelectedMethod}
-                
-                loginAppId={loginAppId}
-                setLoginAppId={setLoginAppId}
+                loginPushId={loginPushId}
+                setLoginPushId={setLoginPushId}
                 loginOTP={loginOTP}
                 setLoginOTP={setLoginOTP}
-                loginOTPDetails={loginOTPDetails}
-                setLoginOTPDetails={setLoginOTPDetails}
+                loginPushStatusDetails={loginPushStatusDetails}
+                setLoginPushStatusDetails={setLoginPushStatusDetails}
               />
             }
 
             {/* --------- ACTIVATE TOKEN PAGE 1 --------- */}
             {page===1 &&
-              <ActivateTokenPage 
-                config={config}
-                proceedBtnPopup={proceedBtnPopup}
-                setProceedBtnPopup={setProceedBtnPopup}
-                largeScreen={largeScreen}
-                tokenValue={tokenValue}
-                page={page}
-                setPage={setPage}
-                appType={1}
-                actTokenAccountId={actTokenAccountId}
-                setActTokenAccountId={setActTokenAccountId}
-                actTokenEmailId={actTokenEmailId}
-                setActTokenEmailId={setActTokenEmailId}
-                actTokenErrorMessage={actTokenErrorMessage}
-                setActTokenErrorMessage={setActTokenErrorMessage}
-                actTokenUserDetails={actTokenUserDetails}
-                setActTokenUserDetails={setActTokenUserDetails}
-                actTokenAppDetails={actTokenAppDetails}
-                setActTokenAppDetails={setActTokenAppDetails}
-                actTokenAppId={actTokenAppId}
-                setActTokenAppId={setActTokenAppId}
-                actTokenOTP={actTokenOTP}
-                setActTokenOTP={setActTokenOTP}
-                actTokenOTPDetails={actTokenOTPDetails}
-                setActTokenOTPDetails={setActTokenOTPDetails}
-              />
+              <React.Fragment>
+                {actTokenAppType?.type>0 ?
+                  <ActivateTokenPage 
+                    config={config}
+                    proceedBtnPopup={proceedBtnPopup}
+                    setProceedBtnPopup={setProceedBtnPopup}
+                    largeScreen={largeScreen}
+                    tokenValue={tokenValue}
+                    page={page}
+                    setPage={setPage}
+                    appType={actTokenAppType?.type}
+                    appTitle={actTokenAppType?.title}
+                    setActTokenAppType={setActTokenAppType}
+                    actTokenEmailId={actTokenEmailId}
+                    setActTokenEmailId={setActTokenEmailId}
+                    actTokenErrorMessage={actTokenErrorMessage}
+                    setActTokenErrorMessage={setActTokenErrorMessage}
+                    actTokenUserDetails={actTokenUserDetails}
+                    setActTokenUserDetails={setActTokenUserDetails}
+                    actTokenAppDetails={actTokenAppDetails}
+                    setActTokenAppDetails={setActTokenAppDetails}
+                    actTokenAppId={actTokenAppId}
+                    setActTokenAppId={setActTokenAppId}
+                    actTokenOTP={actTokenOTP}
+                    setActTokenOTP={setActTokenOTP}
+                    actTokenOTPDetails={actTokenOTPDetails}
+                    setActTokenOTPDetails={setActTokenOTPDetails}
+                  />
+                :
+                  <Stack spacing={2}>
+                    <div style={{ marginTop:'15px', minWidth:largeScreen?'400px':'auto' }}>
+                      <Typography variant="h6" component="div">Select Your Token Choice</Typography>
+                      <Grid container justifyContent="center" spacing={4} sx={{ py:2 }}>
+                        {actTokenTokenChoices.map((tok, index) => (
+                          <Grid key={index} item>
+                            <Card elevation={3} sx={{ maxWidth:180 }}>
+                              <CardActionArea onClick={()=>{ setActTokenAppType(tok) }}>
+                                <center style={{ paddingTop:'5px' }}>
+                                  <img 
+                                    src={tok?.image}
+                                    alt={tok?.name}
+                                    width={120}
+                                  />
+                                </center>
+                                <CardContent>
+                                  <Typography gutterBottom variant="subtitle2" component="div">
+                                    {tok?.name}
+                                  </Typography>
+                                </CardContent>
+                              </CardActionArea>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </div>
+                  </Stack>
+                }
+              </React.Fragment>
             }
             
             {/* --------- HOME PAGE 0 --------- */}

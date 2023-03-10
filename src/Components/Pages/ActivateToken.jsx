@@ -34,8 +34,8 @@ export default function ActivateTokenPage(props) {
     page, 
     setPage,
     appType, // app type defines absolute token or google authenticator token
-    actTokenAccountId,
-    setActTokenAccountId,
+    appTitle,
+    setActTokenAppType,
     actTokenEmailId,
     setActTokenEmailId,
     actTokenErrorMessage,
@@ -73,7 +73,7 @@ export default function ActivateTokenPage(props) {
 
     // clear Activation token page
     const clearActivateAbsoluteToken = () =>{
-        setActTokenAccountId('');
+        setActTokenAppType({});
         setActTokenEmailId('');
         setActTokenErrorMessage('');
         setActTokenUserDetails({});
@@ -86,12 +86,12 @@ export default function ActivateTokenPage(props) {
     }
 
     // get user by type 1/any and assign
-    const getAssignedApplications = async(actTokenUserId) => {
+    const getAssignedApplications = async(accountId,userId) => {
         try {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/v1/user/getAssignedApplications?requestTime=${reqTime}&accountId=${actTokenAccountId}&userId=${actTokenUserId}&type=${appType}`,
+                url: `${config?.baseurl}/v1/user/getAssignedApplications?requestTime=${reqTime}&accountId=${accountId}&userId=${userId}&type=${appType}`,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -130,7 +130,7 @@ export default function ActivateTokenPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/v1/user/getUserByType?requestTime=${reqTime}&accountId=${actTokenAccountId}&searchFor=${actTokenEmailId}&type=${appType}`,
+                url: `${config?.baseurl}/v1/user/getUserByType?requestTime=${reqTime}&searchFor=${actTokenEmailId}&type=${appType}`,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -139,7 +139,7 @@ export default function ActivateTokenPage(props) {
 
             if(response?.data?.resultCode === 0) {
                 setActTokenUserDetails(response?.data?.resultData);
-                getAssignedApplications(response?.data?.resultData?.userid);
+                getAssignedApplications(response?.data?.resultData?.accountid, response?.data?.resultData?.userid);
             } else {
                 setActiveStep(0);
                 setActTokenErrorMessage(response?.data?.resultMessage || 'Error');
@@ -161,7 +161,7 @@ export default function ActivateTokenPage(props) {
         try {
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/absolute/generateToken?accountId=${actTokenAccountId}&id=${actTokenUserDetails?.userid}&appId=${actTokenAppId}&tokenType=2`,
+                url: `${config?.baseurl}/v1/absolute/generateToken?accountId=${actTokenUserDetails?.accountid}&id=${actTokenUserDetails?.userid}&appId=${actTokenAppId}&tokenType=2`,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -219,7 +219,7 @@ export default function ActivateTokenPage(props) {
   return (
     <React.Fragment>
         {/* --------- Activate Absolute Token PAGE 1 --------- */}
-        <h1 style={{ paddingLeft: largeScreen?'10px':'0px' }}>Activate Absolute Token</h1>
+        <h1 style={{ paddingLeft: largeScreen?'10px':'0px' }}>{appTitle}</h1>
 
         <Box sx={{ width: '100%' }}>
             {activeStep === steps.length ? (
@@ -268,20 +268,6 @@ export default function ActivateTokenPage(props) {
                                 spacing={2}
                                 style={{ padding: largeScreen?'10px':'0px', minWidth: largeScreen?'500px':'auto' }}
                             >
-                                <TextField
-                                    required
-                                    fullWidth
-                                    disabled={!(activeStep===0)}
-                                    id="outlined-required"
-                                    label="Account ID"
-                                    placeholder='Enter your account id'
-                                    value={actTokenAccountId}
-                                    onChange={(event) => {
-                                        setActTokenAccountId(event.target.value);
-                                    }
-                                    }
-                                />
-
                                 <TextField
                                     required
                                     fullWidth
@@ -341,7 +327,7 @@ export default function ActivateTokenPage(props) {
                                 <LoadingButton 
                                     variant='contained'
                                     loading={actTokenLoading}
-                                    disabled={actTokenAccountId && actTokenEmailId ? false : true}
+                                    disabled={actTokenEmailId ? false : true}
                                     type='submit'
                                     sx={{
                                         // borderRadius: '30px',
@@ -444,7 +430,7 @@ export default function ActivateTokenPage(props) {
                                 <LoadingButton 
                                     variant='contained'
                                     loading={actTokenLoading}
-                                    disabled={actTokenAccountId && actTokenEmailId ? false : true}
+                                    disabled={actTokenAppId ? false : true}
                                     type='submit'
                                     sx={{
                                         // borderRadius: '30px',

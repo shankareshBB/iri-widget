@@ -17,7 +17,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-p {
+p, div, h1, h2, h3, h4, h5, h6 {
   font-family: 'Jost', 'Source Sans Pro', sans-serif;
 }
 

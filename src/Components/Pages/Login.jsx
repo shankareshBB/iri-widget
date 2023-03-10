@@ -14,7 +14,7 @@ import IRISuccess from '../../assets/Accountsuccess.gif';
 // api calls
 import axios from 'axios';
 
-const steps = ['Step 1 - User Info', 'Step 2 - Generate OTP/Push', 'Step 3 - Verify OTP', 'Step 4 - Check Push Notification'];
+const steps = ['Step 1 - User Info', 'Step 2 - Send OTP/Push', 'Step 3 - Verify OTP'];
 
 function ValidateEmailAddress(inputTxt) {
     if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(inputTxt)) {
@@ -34,8 +34,6 @@ export default function LoginPage(props) {
     page, 
     setPage,
     appType, // app type defines absolute token or google authenticator token
-    loginAccountId,
-    setLoginAccountId,
     loginEmailId,
     setLoginEmailId,
     loginErrorMessage,
@@ -45,15 +43,16 @@ export default function LoginPage(props) {
     loginMethods,
     loginSelectedMethod,
     setLoginSelectedMethod,
-    loginAppId,
-    setLoginAppId,
-    loginOTPDetails,
-    setLoginOTPDetails,
+    loginPushId,
+    setLoginPushId,
     loginOTP,
     setLoginOTP,
+    loginPushStatusDetails,
+    setLoginPushStatusDetails
   } = props;
 
   const [loginLoading, setLoginLoading] = React.useState(false);
+  const [loginPushLoading, setLoginPushLoading] = React.useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
 
   const onResponse = config?.onResponse
@@ -74,14 +73,13 @@ export default function LoginPage(props) {
 
     // clear login page
     const clearLogin = () =>{
-        setLoginAccountId('');
         setLoginEmailId('');
         setLoginErrorMessage('');
         setLoginUserDetails({});
         setLoginSelectedMethod('');
-        setLoginAppId('');
         setLoginOTP('');
-        setLoginOTPDetails('');
+        setLoginPushId('');
+        setLoginPushStatusDetails({});
         setLoginLoading(false);
         setActiveStep(0);
     }
@@ -102,7 +100,7 @@ export default function LoginPage(props) {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/v1/user/getUserByType?requestTime=${reqTime}&accountId=${loginAccountId}&searchFor=${loginEmailId}&type=${appType}`,
+                url: `${config?.baseurl}/v1/user/getUserByType?requestTime=${reqTime}&searchFor=${loginEmailId}&type=${appType}`,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -125,14 +123,49 @@ export default function LoginPage(props) {
             setLoginLoading(false);
         }
     };
-  
+    // check Push Notification
+    const checkPushNotification = (id) => {
+        setLoginPushLoading(true);
+        let intervalId = setInterval(async() => {
+            try {
+                const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
+                const response = await axios({
+                    method: 'post',
+                    url: `${config?.baseurl}/v1/authenticator/checkPushTransactionStatus?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&pushId=${id}`,
+                    headers: {
+                        "authToken": tokenValue
+                    }
+                });
+                onResponse({ 'at':'/v1/authenticator/checkPushTransactionStatus', 'response':response?.data});
+                setLoginPushStatusDetails(response?.data);
+                if(response?.data?.resultCode === 0) {
+                    setActiveStep(3);
+                    setLoginErrorMessage('');
+                } else {
+                    setActiveStep(1);
+                    setLoginErrorMessage(response?.data?.resultMessage || 'Error');
+                }
+            } catch (error) {
+                setActiveStep(1);
+                onError({ 'at':'/v1/authenticator/checkPushTransactionStatusP', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+                setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
+            }
+        }, 1000); // call API every second
+    
+        setTimeout(() => {
+            clearInterval(intervalId);
+            setLoginPushLoading(false);
+        }, 60000); // stop after 1 minute
+    };
+
     // do send otp or push
     const doSendOTP = async() => {
         setLoginLoading(true);
         try {
+            const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/token/sendOTP?accountId=${loginAccountId}&id=${loginUserDetails?.userid}&appId=${loginAppId}&tokenType=2`,
+                url: `${config?.baseurl}/v1/token/sendOTP?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&category=3&type=1`,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -140,7 +173,6 @@ export default function LoginPage(props) {
             onResponse({ 'at':'/v1/token/sendOTP', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
-                setLoginOTPDetails(response?.data?.resultData);
                 setActiveStep(2);
                 setLoginErrorMessage('');
             } else {
@@ -158,9 +190,32 @@ export default function LoginPage(props) {
     const doSendPush = async() => {
         setLoginLoading(true);
         try {
+            let jsonObject = {
+                "requestType":1, 
+                "expirytimeInMins":1,
+            };
+            // "amount": "string",
+            // "appId": "string",
+            // "appUrl": "string",
+            // "consentRequester": "string",
+            // "consetPurpose": "string",
+            // "device": "string",
+            // "expirytimeInMins": 0,
+            // "fromAccount": "string",
+            // "ip": "string",
+            // "message": "string",
+            // "options": "string",
+            // "pushMessageType": 0,
+            // "requestType": 0,
+            // "title": "string",
+            // "toAccount": "string",
+            // "updatePushRequestBefore": "string",
+            
+            const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/authenticator/sendPush?accountId=${loginAccountId}&id=${loginUserDetails?.userid}&appId=${loginAppId}&tokenType=2`,
+                url: `${config?.baseurl}/v1/authenticator/sendPush?requestTime=${reqTime}&accountId=${loginUserDetails?.accountid}&userId=${loginUserDetails?.userid}`,
+                data: jsonObject,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -168,9 +223,11 @@ export default function LoginPage(props) {
             onResponse({ 'at':'/v1/authenticator/sendPush', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
-                setLoginOTPDetails(response?.data?.resultData);
-                setActiveStep(3);
-                setLoginErrorMessage('');
+                setLoginPushId(response?.data?.resultData);
+                // setActiveStep(2);
+                // setLoginErrorMessage('');
+                checkPushNotification(response?.data?.resultData);
+                
             } else {
                 setActiveStep(1);
                 setLoginErrorMessage(response?.data?.resultMessage || 'Error');
@@ -189,6 +246,9 @@ export default function LoginPage(props) {
         if(loginSelectedMethod == 1) {
             doSendOTP();
         } else if(loginSelectedMethod == 2) {
+            setActiveStep(2);
+            setLoginErrorMessage('');
+        } else if(loginSelectedMethod == 3) {
             doSendPush();
         } else {
             setLoginErrorMessage('Select a method to send');
@@ -201,9 +261,10 @@ export default function LoginPage(props) {
         
         setLoginLoading(true);
         try {
+            const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
-                url: `${config?.baseurl}/v1/token/verifyOTP?userId=${loginUserDetails?.userid}&otp=${loginOTP}&appId=${loginAppId}`,
+                url: `${config?.baseurl}/v1/token/verifyOTP?requestTime=${reqTime}&userId=${loginUserDetails?.userid}&OTP=${loginOTP}&category=${loginSelectedMethod==1?3:1}`,
                 headers: {
                     "authToken": tokenValue
                 }
@@ -211,7 +272,7 @@ export default function LoginPage(props) {
             onResponse({ 'at':'/v1/token/verifyOTP', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
-                setActiveStep(4);
+                setActiveStep(3);
                 setLoginErrorMessage('');
             } else {
                 setActiveStep(2);
@@ -283,20 +344,6 @@ export default function LoginPage(props) {
                                     fullWidth
                                     disabled={!(activeStep===0)}
                                     id="outlined-required"
-                                    label="Account ID"
-                                    placeholder='Enter your account id'
-                                    value={loginAccountId}
-                                    onChange={(event) => {
-                                        setLoginAccountId(event.target.value);
-                                    }
-                                    }
-                                />
-
-                                <TextField
-                                    required
-                                    fullWidth
-                                    disabled={!(activeStep===0)}
-                                    id="outlined-required"
                                     type='email'
                                     label="Email ID"
                                     placeholder='Enter your email address'
@@ -351,7 +398,7 @@ export default function LoginPage(props) {
                                 <LoadingButton 
                                     variant='contained'
                                     loading={loginLoading}
-                                    disabled={loginAccountId && loginEmailId ? false : true}
+                                    disabled={loginEmailId ? false : true}
                                     type='submit'
                                     sx={{
                                         // borderRadius: '30px',
@@ -440,7 +487,7 @@ export default function LoginPage(props) {
                                     onClick={() => {
                                         setActiveStep(0);
                                     }}
-                                    disabled={loginLoading}
+                                    disabled={loginLoading && loginPushLoading}
                                     sx={{
                                         // borderRadius: '30px',
                                         fontWeight:'bold',
@@ -455,8 +502,8 @@ export default function LoginPage(props) {
                                 </Button>
                                 <LoadingButton 
                                     variant='contained'
-                                    loading={loginLoading}
-                                    disabled={loginAccountId && loginEmailId ? false : true}
+                                    loading={loginLoading && loginPushLoading}
+                                    disabled={loginSelectedMethod ? false : true}
                                     type='submit'
                                     sx={{
                                         // borderRadius: '30px',
@@ -483,12 +530,6 @@ export default function LoginPage(props) {
                                 spacing={2}
                                 style={{ padding: largeScreen?'10px':'0px', minWidth: largeScreen?'500px':'auto' }}
                             >
-                                <img
-                                    src={loginOTPDetails}
-                                    alt={"QR Code"}
-                                    loading="lazy"
-                                />
-                                
                                 <TextField
                                     required
                                     fullWidth
@@ -532,6 +573,7 @@ export default function LoginPage(props) {
                                     // fullWidth
                                     onClick={() => {
                                         setActiveStep(1);
+                                        setLoginOTP('');
                                     }}
                                     disabled={loginLoading}
                                     sx={{
@@ -567,93 +609,6 @@ export default function LoginPage(props) {
                         </form>
                     }
 
-                    {activeStep === 3 &&
-                        <form onSubmit={verifyOTP} autoComplete="off" >
-                            <Stack 
-                                direction='column'
-                                justifyContent="center"
-                                alignItems="center"
-                                spacing={2}
-                                style={{ padding: largeScreen?'10px':'0px', minWidth: largeScreen?'500px':'auto' }}
-                            >
-                                check push transition
-                                <TextField
-                                    required
-                                    fullWidth
-                                    disabled={!(activeStep === 2)}
-                                    // variant='outlined'
-                                    id="outlined-required"
-                                    label="OTP"
-                                    placeholder='Enter your OTP'
-                                    value={loginOTP}
-                                    onChange={(event) => {
-                                        setLoginOTP(event.target.value);
-                                    }
-                                    }
-                                />
-
-                            </Stack>
-                            <div style={{ textAlign:'center', padding:'10px' }}>
-                               
-                                {loginErrorMessage && 
-                                    <div 
-                                        style={{ 
-                                        color: '#ff0000',
-                                        padding: '0px 12px 5px 12px',
-                                        fontSize: '12px',
-                                        textAlign: 'center'
-                                        }}
-                                    >
-                                        {loginErrorMessage}
-                                    </div>
-                                }
-                            </div>
-                            <Stack 
-                                direction={{ xs: 'column', sm: 'row' }}
-                                justifyContent="center"
-                                alignItems="center"
-                                spacing={2}
-                                style={{ paddingTop:'10px' }}
-                            >
-                                <Button 
-                                    variant='contained'
-                                    // fullWidth
-                                    onClick={() => {
-                                        setActiveStep(1);
-                                    }}
-                                    disabled={loginLoading}
-                                    sx={{
-                                        // borderRadius: '30px',
-                                        fontWeight:'bold',
-                                        backgroundColor:'#282829',
-                                        color:'#fff',
-                                        '&:active, &:focus, &:hover': {
-                                            backgroundColor:'#000',
-                                        }
-                                    }}
-                                >
-                                    Back
-                                </Button>
-                                <LoadingButton 
-                                    variant='contained'
-                                    loading={loginLoading}
-                                    disabled={loginOTP ? false : true}
-                                    type='submit'
-                                    sx={{
-                                        // borderRadius: '30px',
-                                        fontWeight:'bold',
-                                        backgroundColor:'#ffc107',
-                                        color:'#fff',
-                                        '&:active, &:focus, &:hover': {
-                                            backgroundColor:'#ffbf00',
-                                        }
-                                    }}
-                                >
-                                    Submit
-                                </LoadingButton>
-                            </Stack>
-                        </form>
-                    }
                 </React.Fragment>
             )}
         </Box>

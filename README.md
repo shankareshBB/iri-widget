@@ -1,6 +1,6 @@
 ## Installation:
 
-**IRI Widget** - _used to popup the payment gateway at the current page itself._
+**IRI Widget** - _used to popup the axiom protect 2.0 at the current page itself._
 
 Use this script tag to get access to the widget.
 
@@ -59,6 +59,8 @@ _Here, the config variable is used to pass the data. And the container variable 
 
 - _**`baseurl`** should pass as a string value. It is used as the base URL for API calls._
 - _**`showPopup`** is used to pass a boolean value ( **`true`** or **`false`** ). To toggle the widget popup._
+- _**`userId`** should pass as a string value. It is used get the jwt token from the operator mail._
+- _**`linkForTC`** should pass as a string value. It is used to redirect the Terms and condition page or any URL or **`#`** ._
 - _**`onResponse`** is a callback function. It is getting called when the API gives a successful response. Return data is an object with its API endpoint and result._
 - _**`onError`** is a callback function. It is getting called when the API gives an error message. Return data is an object with its API endpoint and result._
 - _**`onPopupClose`** is a callback function. It is getting called when the popup gets closed or session gets expired. Return data is an object with its action and result._
