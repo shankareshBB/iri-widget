@@ -54,11 +54,6 @@ function App({ config }) {
           "message": "Popup will get closed",
           "action": "user token"
         });
-        // setProceedBtnPopup(false);
-        // onPopupClose({
-        //   "result": resp?.data?.resultMessage,
-        //   "action": "transaction"
-        // });
       }
 
       setCallingApi(false);
@@ -80,17 +75,12 @@ function App({ config }) {
   },[config?.showPopup]);
 
   function configErr(message) {
+    onError(new Error(message));
     onError({
       "result": "Configuration data are missing out. Please provide it!",
       "message": {message},
       "action": "config data"
     });
-    // setWidgetStatusDisplay(message);
-    // setProceedBtnPopup(false);
-    // onPopupClose({
-    //   "result": "Configuration data are missing out. Please provide it!",
-    //   "action": "config data"
-    // });
   }
 
   
@@ -99,16 +89,12 @@ function App({ config }) {
       callingOnceConfig.current=false;
       setIsAllowed(false);
       if (!config) {
-        onError(new Error("Please pass all required config in Props"));
         configErr("Please pass all required config in Props");
       } else if (!config?.baseurl) {
-        onError(new Error("Please pass base URL in config"));
         configErr("Please pass base URL in config");
       } else if (!config?.userId) {
-        onError(new Error("Please pass User ID in config"));
         configErr("Please pass User ID in config");
       } else if (!config?.linkForTC) {
-        onError(new Error("Please pass Link for Terms and condition in config"));
         configErr("Please pass Link for Terms and condition in config");
       } else {
         setIsAllowed(true);
@@ -116,7 +102,7 @@ function App({ config }) {
       }
     }
 
-    return () => { }
+    return () => { console.log("IRI Self Registration Version : 1.0.2"); }
   }, []);
 
   return (

@@ -363,7 +363,7 @@ export default function FirstPageIndex(props) {
                             Activate Token
                         </Button>
 
-                        <Button 
+                        {/* {config?.showLogin && <Button 
                             variant='contained'
                             fullWidth
                             onClick={() => {
@@ -380,7 +380,7 @@ export default function FirstPageIndex(props) {
                             }}
                         >
                             Login
-                        </Button>
+                        </Button>} */}
                     </Stack>
                     <Button 
                         variant='contained'
