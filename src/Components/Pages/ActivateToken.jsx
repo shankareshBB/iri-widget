@@ -31,6 +31,7 @@ export default function ActivateTokenPage(props) {
     proceedBtnPopup, 
     setProceedBtnPopup, 
     tokenValue, 
+    setTokenValue, 
     page, 
     setPage,
     appType, // app type defines absolute token or google authenticator token
@@ -72,7 +73,8 @@ export default function ActivateTokenPage(props) {
     };
 
     // clear Activation token page
-    const clearActivateAbsoluteToken = () =>{
+    const clearActivateAbsoluteToken = () => {
+        setTokenValue('');
         setActTokenAppType({});
         setActTokenEmailId('');
         setActTokenErrorMessage('');
@@ -86,14 +88,14 @@ export default function ActivateTokenPage(props) {
     }
 
     // get user by type 1/any and assign
-    const getAssignedApplications = async(accountId,userId) => {
+    const getAssignedApplications = async(tokenVal, accountId, userId) => {
         try {
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
                 url: `${config?.baseurl}/user/getAssignedApplicationsByType?requestTime=${reqTime}&accountId=${accountId}&userId=${userId}&appType=${appType}`,
                 headers: {
-                    "authToken": tokenValue
+                    "authToken": tokenVal
                 }
             });
             onResponse({ 'at':'/user/getAssignedApplicationsByType', 'response':response?.data});
@@ -104,55 +106,84 @@ export default function ActivateTokenPage(props) {
                 }));
                 setActiveStep(1);
                 setActTokenErrorMessage('');
+                setActTokenLoading(false);
             } else {
                 setActiveStep(0);
                 setActTokenErrorMessage(response?.data?.resultMessage || 'Error');
+                setActTokenLoading(false);
             }
         } catch (error) {
+            setActTokenLoading(false);
             setActiveStep(0);
             onError({ 'at':'/user/getAssignedApplicationsByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         }
     };
-    const getUserByTypeOneOrAnyAndAssign = async(e) => {
-        e.preventDefault();
-        
-        setActTokenLoading(true);
+    const getUserByTypeOneOrAnyAndAssign = async(tokenVal, emailId) => {
         try {
-            const validEmail = ValidateEmailAddress(actTokenEmailId);
-            if(validEmail === false) {
-              onError({ 'action':'Form validation', 'error':'Invalid email address' });
-              setActiveStep(0);
-              setActTokenErrorMessage('Invalid email address');
-              return;
-            }
+            // const validEmail = ValidateEmailAddress(emailId);
+            // if(validEmail === false) {
+            //   onError({ 'action':'Form validation', 'error':'Invalid email address' });
+            //   setActiveStep(0);
+            //   setActTokenErrorMessage('Invalid email address');
+            //   return;
+            // }
 
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/user/getUserByType?requestTime=${reqTime}&searchFor=${actTokenEmailId}&type=${appType}`,
+                url: `${config?.baseurl}/user/getUserByType?requestTime=${reqTime}&searchFor=${emailId}&type=${appType}`,
                 headers: {
-                    "authToken": tokenValue
+                    "authToken": tokenVal
                 }
             });
             onResponse({ 'at':'/user/getUserByType', 'response':response?.data});
 
             if(response?.data?.resultCode === 0) {
                 setActTokenUserDetails(response?.data?.resultData);
-                getAssignedApplications(response?.data?.resultData?.accountid, response?.data?.resultData?.userid);
+                getAssignedApplications(tokenVal, response?.data?.resultData?.accountid, response?.data?.resultData?.userid);
             } else {
                 setActiveStep(0);
                 setActTokenErrorMessage(response?.data?.resultMessage || 'Error');
+                setActTokenLoading(false);
             }
         } catch (error) {
+            setActTokenLoading(false);
             setActiveStep(0);
             onError({ 'at':'/user/getUserByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
-        } finally {
-            setActTokenLoading(false);
         }
     };
-  
+    // get JWT token and started
+    const getJWTToken = async (e) => {
+        e.preventDefault();
+        
+        setActTokenLoading(true);
+        try {
+            const resp = await axios({
+                method: 'POST',
+                url: `${config?.baseurl}/absolute/getJWTToken?userId=${actTokenEmailId}`
+            });
+            onResponse({"at":"/absolute/getJWTToken", "response":resp.data});
+            if(resp?.data?.resultCode === 0) {
+                getUserByTypeOneOrAnyAndAssign(resp?.data?.resultData, actTokenEmailId)
+                setActTokenErrorMessage('');
+                setTokenValue(resp?.data?.resultData || '');
+            } else {
+                setActTokenErrorMessage(resp?.data?.resultMessage);
+                onError({
+                    "result": resp?.data?.resultMessage,
+                    "action": "jwt token"
+                });
+                setActTokenLoading(false);
+            }
+        } catch (error) {
+            setActTokenLoading(false);
+            onError({"at":"/absolute/getJWTToken", "error": error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            setActTokenErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
+        }
+    };
+    
     // do generate token
     const doGenerateToken = async(e) => {
         e.preventDefault();
@@ -243,7 +274,6 @@ export default function ActivateTokenPage(props) {
                                 clearActivateAbsoluteToken();
                             }}
                             sx={{
-                                // borderRadius: '30px',
                                 fontWeight:'bold',
                                 backgroundColor:'#282829',
                                 color:'#fff',
@@ -260,7 +290,7 @@ export default function ActivateTokenPage(props) {
                 <React.Fragment>
                 
                     {activeStep === 0 &&
-                        <form onSubmit={getUserByTypeOneOrAnyAndAssign} autoComplete="off" >
+                        <form onSubmit={getJWTToken} autoComplete="off" >
                             <Stack 
                                 direction='column'
                                 justifyContent="center"
@@ -273,9 +303,8 @@ export default function ActivateTokenPage(props) {
                                     fullWidth
                                     disabled={!(activeStep===0)}
                                     id="outlined-required"
-                                    type='email'
-                                    label="Email ID"
-                                    placeholder='Enter your email address'
+                                    label="Email ID/User ID"
+                                    placeholder='Enter your email address or user id'
                                     value={actTokenEmailId}
                                     onChange={(event) => {
                                         setActTokenEmailId(event.target.value);

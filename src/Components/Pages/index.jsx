@@ -10,25 +10,19 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { CardActionArea, Avatar, FormGroup, Stack } from '@mui/material';
+import { CardActionArea, Avatar, Stack } from '@mui/material';
 // images
 import IRIClose from '../../assets/close-button.png';
-import IRIPush from '../../assets/001-notification.png';
-import IRIMail from '../../assets/002-email.png';
-import IRISoft from '../../assets/003-soft.png';
+// import IRIPush from '../../assets/001-notification.png';
+// import IRIMail from '../../assets/002-email.png';
+// import IRISoft from '../../assets/003-soft.png';
 import IRIAxiomProtect from '../../assets/axiom_protect_logo.png';
 import IRIGoogleAuthToken from '../../assets/Google_Authenticator_for_Android_icon.svg.png';
 import IRIMicrosoftAuthToken from '../../assets/MicrosoftMFA.webp';
 // files
-import axios from 'axios';
 import SelfRegPage from './SelfRegister';
-import LoginPage from './Login';
+// import LoginPage from './Login';
 import ActivateTokenPage from './ActivateToken';
 
 
@@ -41,26 +35,13 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   
 export default function FirstPageIndex(props) {
   // consumer data
-  const { config, largeScreen, proceedBtnPopup, setProceedBtnPopup, tokenValue, setTokenValue, isAllowed, widgetStatusDisplay, setWidgetStatusDisplay } = props;
+  const { config, largeScreen, proceedBtnPopup, setProceedBtnPopup } = props;
 
-  const onResponse = config?.onResponse
-    ? config.onResponse
-    : (data) => {
-        console.log("Xpay Response ::> ", data);
-      };
-  const onError = config?.onError
-    ? config.onError
-    : (err) => {
-        throw err;
-      };
-  const onPopupClose = config?.onPopupClose
-    ? config.onPopupClose
-    : (data) => {
-        console.log("Pop Up closed ::> ",data);
-    };
+  // get token value used for self registration
+  const [tokenValue, setTokenValue] = React.useState('');
 
-    // Page using 0 for home page 1 for activate token and 2 for login and 3 for self registration
-    const [page, setPage] = React.useState(0);
+  // Page using 0 for home page 1 for activate token and 2 for login and 3 for self registration
+  const [page, setPage] = React.useState(0);
 
   // Self registration form values and error/success message
   const [sRegAccountId, setSRegAccountId] = React.useState('');
@@ -73,33 +54,33 @@ export default function FirstPageIndex(props) {
   const [sRegShowSuccessMessage, setSRegShowSuccessMessage] = React.useState(false);
 
   // Login form values and error/success message
-  const [loginEmailId, setLoginEmailId] = React.useState('');
-  const [loginErrorMessage, setLoginErrorMessage] = React.useState('');
-  const [loginUserDetails, setLoginUserDetails] = React.useState({});
-  const loginMethods = [
-    {
-      id: '1',
-      name: 'Email OTP',
-      image: IRIMail,
-      category:3
-    },
-    {
-      id: '2',
-      name: 'Soft OTP',
-      image: IRISoft,
-      category:1
-    },
-    {
-      id: '3',
-      name: 'Push',
-      image: IRIPush,
-      category:0 //no category
-    },
-  ];
-  const [loginSelectedMethod, setLoginSelectedMethod] = React.useState('');
-  const [loginPushId, setLoginPushId] = React.useState('');
-  const [loginPushStatusDetails, setLoginPushStatusDetails] = React.useState({});
-  const [loginOTP, setLoginOTP] = React.useState('');
+  // const [loginEmailId, setLoginEmailId] = React.useState('');
+  // const [loginErrorMessage, setLoginErrorMessage] = React.useState('');
+  // const [loginUserDetails, setLoginUserDetails] = React.useState({});
+  // const loginMethods = [
+  //   {
+  //     id: '1',
+  //     name: 'Email OTP',
+  //     image: IRIMail,
+  //     category:3
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Soft OTP',
+  //     image: IRISoft,
+  //     category:1
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'Push',
+  //     image: IRIPush,
+  //     category:0 //no category
+  //   },
+  // ];
+  // const [loginSelectedMethod, setLoginSelectedMethod] = React.useState('');
+  // const [loginPushId, setLoginPushId] = React.useState('');
+  // const [loginPushStatusDetails, setLoginPushStatusDetails] = React.useState({});
+  // const [loginOTP, setLoginOTP] = React.useState('');
 
   // Activate token form values and error/success message
   const actTokenTokenChoices = [
@@ -134,7 +115,6 @@ export default function FirstPageIndex(props) {
   const handleClearAll = () => {
     setPage(0);                  // Page goes to the beginning of the widget 
     setTokenValue("");           // clear JWT token 
-    setWidgetStatusDisplay('');  // clear error msg of popup
 
     setSRegAccountId('');        // clear form value of self registration
     setSRegUserId('');           // clear form value of self registration
@@ -145,13 +125,13 @@ export default function FirstPageIndex(props) {
     setSRegErrorMessage('');     // clear error message of self registration
     setSRegShowSuccessMessage(false); // clear success message of self registration
     
-    setLoginEmailId('');         // clear form value of login
-    setLoginErrorMessage('');    // clear error message of login
-    setLoginUserDetails({});     // clear api response of get user by type
-    setLoginSelectedMethod('');  // clear selected method of login
-    setLoginPushStatusDetails({});// clear api response of push status
-    setLoginPushId('');          // clear api response push id
-    setLoginOTP('');             // clear form value of login
+    // setLoginEmailId('');         // clear form value of login
+    // setLoginErrorMessage('');    // clear error message of login
+    // setLoginUserDetails({});     // clear api response of get user by type
+    // setLoginSelectedMethod('');  // clear selected method of login
+    // setLoginPushStatusDetails({});// clear api response of push status
+    // setLoginPushId('');          // clear api response push id
+    // setLoginOTP('');             // clear form value of login
     
     setActTokenAppType({});      // clear selected app type of token
     setActTokenEmailId('');      // clear form value of activate token
@@ -218,6 +198,7 @@ export default function FirstPageIndex(props) {
                 setProceedBtnPopup={setProceedBtnPopup}
                 largeScreen={largeScreen}
                 tokenValue={tokenValue}
+                setTokenValue={setTokenValue}
                 page={page}
                 setPage={setPage}
 
@@ -241,13 +222,14 @@ export default function FirstPageIndex(props) {
             }
 
             {/* --------- LOGIN PAGE 2 --------- */}
-            {page===2 &&
+            {/* {page===2 &&
               <LoginPage 
                 config={config}
                 proceedBtnPopup={proceedBtnPopup}
                 setProceedBtnPopup={setProceedBtnPopup}
                 largeScreen={largeScreen}
                 tokenValue={tokenValue}
+                setTokenValue={setTokenValue}
                 page={page}
                 setPage={setPage}
                 
@@ -268,7 +250,7 @@ export default function FirstPageIndex(props) {
                 loginPushStatusDetails={loginPushStatusDetails}
                 setLoginPushStatusDetails={setLoginPushStatusDetails}
               />
-            }
+            } */}
 
             {/* --------- ACTIVATE TOKEN PAGE 1 --------- */}
             {page===1 &&
@@ -280,6 +262,7 @@ export default function FirstPageIndex(props) {
                     setProceedBtnPopup={setProceedBtnPopup}
                     largeScreen={largeScreen}
                     tokenValue={tokenValue}
+                    setTokenValue={setTokenValue}
                     page={page}
                     setPage={setPage}
                     appType={actTokenAppType?.type}
@@ -351,7 +334,6 @@ export default function FirstPageIndex(props) {
                                 setPage(1);
                             }}
                             sx={{
-                                // borderRadius: '30px',
                                 fontWeight:'bold',
                                 backgroundColor:'#282829',
                                 color:'#fff',
@@ -389,7 +371,6 @@ export default function FirstPageIndex(props) {
                             setPage(3);
                         }}
                         sx={{
-                            // borderRadius: '30px',
                             fontWeight:'bold',
                             backgroundColor:'#ffc107',
                             color:'#fff',
@@ -405,18 +386,6 @@ export default function FirstPageIndex(props) {
             }
           </React.Fragment>
         </DialogContent>
-
-        {/* <DialogActions 
-          style={{ 
-            // justifyContent:openCreateAccount?'space-between':'flex-end', 
-            justifyContent:'space-between',
-            minHeight:'30px', 
-            padding: '8px 16px 12px' 
-          }}
-        >
-          <div style={{ color:'#ffc107',fontSize:'13px' }}>Version:1.0.0</div>
-
-        </DialogActions> */}
       </BootstrapDialog>}
     </>
   );

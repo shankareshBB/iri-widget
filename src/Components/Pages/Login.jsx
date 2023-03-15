@@ -30,7 +30,8 @@ export default function LoginPage(props) {
     largeScreen, 
     proceedBtnPopup, 
     setProceedBtnPopup, 
-    tokenValue, 
+    tokenValue,
+    setTokenValue, 
     page, 
     setPage,
     appType, // app type defines absolute token or google authenticator token
@@ -73,6 +74,7 @@ export default function LoginPage(props) {
 
     // clear login page
     const clearLogin = () =>{
+        setTokenValue('');
         setLoginEmailId('');
         setLoginErrorMessage('');
         setLoginUserDetails({});
@@ -84,25 +86,23 @@ export default function LoginPage(props) {
         setActiveStep(0);
     }
 
-    const getUserByTypeOneOrAny = async(e) => {
-        e.preventDefault();
-        
-        setLoginLoading(true);
+    // get user details by type 1
+    const getUserByTypeOneOrAny = async(tokenVal, emailId) => {
         try {
-            const validEmail = ValidateEmailAddress(loginEmailId);
-            if(validEmail === false) {
-              onError({ 'action':'Form validation', 'error':'Invalid email address' });
-              setActiveStep(0);
-              setLoginErrorMessage('Invalid email address');
-              return;
-            }
+            // const validEmail = ValidateEmailAddress(loginEmailId);
+            // if(validEmail === false) {
+            //   onError({ 'action':'Form validation', 'error':'Invalid email address' });
+            //   setActiveStep(0);
+            //   setLoginErrorMessage('Invalid email address');
+            //   return;
+            // }
 
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'get',
-                url: `${config?.baseurl}/user/getUserByType?requestTime=${reqTime}&searchFor=${loginEmailId}&type=${appType}`,
+                url: `${config?.baseurl}/user/getUserByType?requestTime=${reqTime}&searchFor=${emailId}&type=${appType}`,
                 headers: {
-                    "authToken": tokenValue
+                    "authToken": tokenVal
                 }
             });
             onResponse({ 'at':'/user/getUserByType', 'response':response?.data});
@@ -111,18 +111,50 @@ export default function LoginPage(props) {
                 setLoginUserDetails(response?.data?.resultData);
                 setActiveStep(1);
                 setLoginErrorMessage('');
+                setLoginLoading(false);
             } else {
                 setActiveStep(0);
                 setLoginErrorMessage(response?.data?.resultMessage || 'Error');
+                setLoginLoading(false);
             }
         } catch (error) {
+            setLoginLoading(false);
             setActiveStep(0);
             onError({ 'at':'/user/getUserByType', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
-        } finally {
-            setLoginLoading(false);
         }
     };
+    // get JWT token and started
+    const getJWTToken = async (e) => {
+        e.preventDefault();
+        
+        setLoginLoading(true);
+        try {
+            const resp = await axios({
+                method: 'POST',
+                url: `${config?.baseurl}/absolute/getJWTToken?userId=${loginEmailId}`
+            });
+            onResponse({"at":"/absolute/getJWTToken", "response":resp.data});
+            if(resp?.data?.resultCode === 0) {
+                getUserByTypeOneOrAny(resp?.data?.resultData, loginEmailId)
+                setLoginErrorMessage('');
+                setTokenValue(resp?.data?.resultData || '');
+            } else {
+                setLoginErrorMessage(resp?.data?.resultMessage);
+                onError({
+                    "result": resp?.data?.resultMessage,
+                    "action": "jwt token"
+                });
+                setLoginLoading(false);
+            }
+        } catch (error) {
+            setLoginLoading(false);
+            onError({"at":"/absolute/getJWTToken", "error": error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            setLoginErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
+        }
+    };
+    
+
     // check Push Notification
     const checkPushNotification = (id) => {
         setLoginPushLoading(true);
@@ -194,23 +226,6 @@ export default function LoginPage(props) {
                 "requestType":1, 
                 "expirytimeInMins":1,
             };
-            // "amount": "string",
-            // "appId": "string",
-            // "appUrl": "string",
-            // "consentRequester": "string",
-            // "consetPurpose": "string",
-            // "device": "string",
-            // "expirytimeInMins": 0,
-            // "fromAccount": "string",
-            // "ip": "string",
-            // "message": "string",
-            // "options": "string",
-            // "pushMessageType": 0,
-            // "requestType": 0,
-            // "title": "string",
-            // "toAccount": "string",
-            // "updatePushRequestBefore": "string",
-            
             const reqTime = new Date().toISOString().replaceAll("T", " ").replaceAll("Z", "");
             const response = await axios({
                 method: 'post',
@@ -224,8 +239,7 @@ export default function LoginPage(props) {
 
             if(response?.data?.resultCode === 0) {
                 setLoginPushId(response?.data?.resultData);
-                // setActiveStep(2);
-                // setLoginErrorMessage('');
+                setLoginErrorMessage('');
                 checkPushNotification(response?.data?.resultData);
                 
             } else {
@@ -331,7 +345,7 @@ export default function LoginPage(props) {
                 <React.Fragment>
                 
                     {activeStep === 0 &&
-                        <form onSubmit={getUserByTypeOneOrAny} autoComplete="off" >
+                        <form onSubmit={getJWTToken} autoComplete="off" >
                             <Stack 
                                 direction='column'
                                 justifyContent="center"
@@ -344,9 +358,8 @@ export default function LoginPage(props) {
                                     fullWidth
                                     disabled={!(activeStep===0)}
                                     id="outlined-required"
-                                    type='email'
-                                    label="Email ID"
-                                    placeholder='Enter your email address'
+                                    label="Email ID/User ID"
+                                    placeholder='Enter your email address or user id'
                                     value={loginEmailId}
                                     onChange={(event) => {
                                         setLoginEmailId(event.target.value);

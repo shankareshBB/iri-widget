@@ -38,9 +38,9 @@ export default function SelfRegPage(props) {
     proceedBtnPopup, 
     setProceedBtnPopup, 
     tokenValue, 
+    setTokenValue, 
     page, 
     setPage,
-
     sRegAccountId,
     setSRegAccountId,
     sRegUserId,
@@ -79,6 +79,7 @@ export default function SelfRegPage(props) {
 
     // clear self register page
     const clearSelfRegister = () =>{
+        setTokenValue('');
         setSRegAccountId('');
         setSRegUserId('');
         setSRegUsername('');
@@ -91,10 +92,7 @@ export default function SelfRegPage(props) {
     }
 
     // create new account
-    const createMyAccount = async(e) => {
-        e.preventDefault();
-        
-        setSRegLoading(true);
+    const createMyAccount = async(tokenVal) => {
         try {
             const validEmail = ValidateEmailAddress(sRegEmailId);
             if(validEmail === false) {
@@ -125,7 +123,7 @@ export default function SelfRegPage(props) {
                 url: `${config?.baseurl}/user/create?requestTime=${reqTime}`,
                 data: jsonObject,
                 headers: {
-                    "authToken": tokenValue
+                    "authToken": tokenVal
                 }
             });
             onResponse({ 'at':'/user/create', 'response':response?.data});
@@ -133,16 +131,46 @@ export default function SelfRegPage(props) {
             if(response?.data?.resultCode === 0) {
                 setSRegShowSuccessMessage(true);
                 setSRegErrorMessage('');
+                setSRegLoading(false);
             } else {
                 setSRegShowSuccessMessage(false);
                 setSRegErrorMessage(response?.data?.resultMessage || 'Error');
+                setSRegLoading(false);
             }
         } catch (error) {
+            setSRegLoading(false);
             setSRegShowSuccessMessage(false);
             onError({ 'at':'/user/create', 'error':error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
             setSRegErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
-        } finally {
+        }
+    };
+    // get JWT token and started
+    const getJWTToken = async (e) => {
+        e.preventDefault();
+        
+        setSRegLoading(true);
+        try {
+            const resp = await axios({
+                method: 'POST',
+                url: `${config?.baseurl}/absolute/getJWTToken?userId=${sRegAccountId || sRegUserId}`
+            });
+            onResponse({"at":"/absolute/getJWTToken", "response":resp.data});
+            if(resp?.data?.resultCode === 0) {
+                createMyAccount(resp?.data?.resultData)
+                setSRegErrorMessage('');
+                setTokenValue(resp?.data?.resultData || '');
+            } else {
+                setSRegErrorMessage(resp?.data?.resultMessage);
+                onError({
+                    "result": resp?.data?.resultMessage,
+                    "action": "jwt token"
+                });
+                setSRegLoading(false);
+            }
+        } catch (error) {
             setSRegLoading(false);
+            onError({"at":"/absolute/getJWTToken", "error": error?.response?.data?.resultMessage || error?.response?.data || error?.message || error});
+            setSRegErrorMessage(error?.response?.data?.resultMessage || error?.response?.data || error?.message || error);
         }
     };
   
@@ -186,7 +214,7 @@ export default function SelfRegPage(props) {
             </React.Fragment>
         :
             <React.Fragment>
-                <form onSubmit={createMyAccount} autoComplete="off" >
+                <form onSubmit={getJWTToken} autoComplete="off" >
                     <Stack 
                         direction='column'
                         justifyContent="center"
