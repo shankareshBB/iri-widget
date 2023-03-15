@@ -1,7 +1,5 @@
 import React from 'react';
-import { Backdrop, CircularProgress } from '@mui/material';
 import PopUpIndex from './Components';
-import axios from 'axios';
 
 function App({ config }) {
   // all data are available check
