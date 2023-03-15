@@ -50,7 +50,7 @@ function App({ config }) {
       }
     }
 
-    return () => { console.log("IRI Self Registration Version : 1.0.3"); }
+    return () => { console.log("IRI Self Registration Version : 1.0.4"); }
   }, []);
 
   return (

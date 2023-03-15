@@ -4,7 +4,7 @@
 
 Use this script tag to get access to the widget.
 
-**_`<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.3/dist/index.min.js"></script>`_**
+**_`<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.4/dist/index.min.js"></script>`_**
 
 ## Implementation:
 
@@ -27,7 +27,7 @@ Use this script tag to get access to the widget.
 4. Add a Script tag to the head tag or body tag. And use the latest version.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.3/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iri-widget@1.0.4/dist/index.min.js"></script>
 ```
 
 5. Next, add the script tag at a necessary place. But add below the widget script.
